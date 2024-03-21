@@ -1,4 +1,4 @@
-package com.example.earthquakes.earthquakes;
+package com.example.earthquakes.main;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
@@ -6,7 +6,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Toast;
 
+import com.example.earthquakes.Earthquake;
 import com.example.earthquakes.databinding.ActivityMainBinding;
 
 public class MainActivity extends AppCompatActivity {
@@ -21,24 +23,25 @@ public class MainActivity extends AppCompatActivity {
 
         binding.earthquakeRecycler.setLayoutManager(new LinearLayoutManager(this));
 
-        MainViewModel viewModel = new ViewModelProvider(this).get(MainViewModel.class);
+        MainViewModel viewModel = new ViewModelProvider(this,
+                new MainViewModelFactory(getApplication()))
+                .get(MainViewModel.class);
 
-        viewModel.getEarthquakeList().observe(this, eqList->{
-            for (Earthquake eq : eqList) {
-                Log.d("eq", eq.getMagnitude() + " " + eq.getPlace());
-            }
-        });
-        viewModel.getEarthquakes();
+        binding.earthquakeRecycler.setLayoutManager(new LinearLayoutManager(this));
 
-
-
-        //MADE BY ME
         EarthquakeAdapter adapter = new EarthquakeAdapter();
-        binding.earthquakeRecycler.setAdapter(adapter);
+        adapter.setOnItemClickListener(earthquake ->
+                Toast.makeText(MainActivity.this,
+                        earthquake.getPlace(),
+                        Toast.LENGTH_SHORT).show());
 
-        viewModel.getEarthquakeList().observe(this, eqList->{
+        binding.earthquakeRecycler.setAdapter(adapter);
+        viewModel.downloadEartquakes();
+
+        viewModel.getEarthquakesList().observe(this,eqList ->{
             adapter.submitList(eqList);
         });
+
 
     }
 }
